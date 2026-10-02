@@ -71,7 +71,14 @@ fi
 mkdir -p rpm-dist
 
 if [ $opt_tarball -eq 1 ]; then
-    make dist
+    # automake refuses to create a ustar archive (am__tar=false) when the build
+    # user's uid or gid exceeds the format's limit of 2097151, as LDAP accounts
+    # often do, and make dist then silently produces an empty tarball. Stage
+    # the tree with make and archive it with root ownership so the ids fit.
+    make distdir
+    distdir=$(ls -d ucx-*/ | head -1); distdir=${distdir%/}
+    tar --format=ustar --owner=0 --group=0 -czf "$distdir.tar.gz" "$distdir"
+    rm -rf "$distdir"
 fi
 
 # Version includes revision, while tarball in Source doesn't have it since
