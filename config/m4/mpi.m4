@@ -32,7 +32,14 @@ AS_IF([test "x$with_mpi" = xyes],
         AC_PATH_PROGS(MPIRUN,mpirun mpiexec aprun orterun,"",$mpi_path)
         AS_IF([test -z "$MPIRUN"],
               AC_MSG_ERROR([--with-mpi was requested but MPI was not found in the PATH in $mpi_path]),[:])
-        ],[:])
+        ],
+        [
+        # Without --with-mpi, ignore MPICC/SHMEMCC/MPIRUN from the environment
+        # so that MPI stays disabled as documented.
+        MPICC=""
+        SHMEMCC=""
+        MPIRUN=""
+        ])
 
 AS_IF([test -n "$MPICC"],
       [AC_DEFINE([HAVE_MPI], [1], [MPI support])
